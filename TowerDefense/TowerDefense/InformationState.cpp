@@ -2,23 +2,49 @@
 #include "Utility.h"
 #include "Foreach.h"
 #include "ResourceHolder.h"
+#include <algorithm>
 
 #include <SFML/Graphics/RenderWindow.hpp>
 #include <SFML/Graphics/View.hpp>
 #include <SFML/Graphics/RectangleShape.hpp>
+
+static sf::FloatRect makeLetterboxViewport(sf::Vector2u winSize)
+{
+	const float viewW = 1920.f, viewH = 1080.f;
+	float windowRatio = static_cast<float>(winSize.x) / winSize.y;
+	float viewRatio = viewW / viewH;
+
+	float sizeX = 1.f, sizeY = 1.f, posX = 0.f, posY = 0.f;
+	if (windowRatio > viewRatio) {
+		sizeX = viewRatio / windowRatio;
+		posX = (1.f - sizeX) * 0.5f;
+	}
+	else {
+		sizeY = windowRatio / viewRatio;
+		posY = (1.f - sizeY) * 0.5f;
+	}
+	return { posX, posY, sizeX, sizeY };
+}
+
 
 InformationState::InformationState(StateStack& stack, Context context)
 	: State(stack, context)
 {
 	sf::Texture& texture = context.textures->get(Textures::infoPanel);
 	mBackgroundSprite.setTexture(texture);
+	mBackgroundSprite.setPosition(0.f, 0.f);
+
+	// UI view: 1920x1080 logical canvas
+	mUiView = sf::View({ 0.f, 0.f, 1920.f, 1080.f });
+	mUiViewport = makeLetterboxViewport(context.window->getSize());
+	mUiView.setViewport(mUiViewport);
 
 	// Close Info Button
 	mCloseInfoButton.setTexture(context.textures->get(Textures::closeButton));
 	mCloseInfoButton.setPosition(1400.f, 290.f);
 	centerOrigin(mCloseInfoButton);
 
-	// Get the font
+	// Font
 	mFont = context.fonts->get(Fonts::KnightWarrior);
 
 	// These coordinates should match the box in your background image
@@ -76,40 +102,48 @@ InformationState::InformationState(StateStack& stack, Context context)
 	mScrollArea.setFillColor(sf::Color(0, 255, 0, 100)); // Semi-transparent green
 	mScrollArea.setOutlineColor(sf::Color::Green);
 	mScrollArea.setOutlineThickness(2.f);
+
+	// Max scroll (content height - viewport height)
+	float contentHeight = mInfoTexts.back().getPosition().y +
+		mInfoTexts.back().getGlobalBounds().height;
+	mMaxOffset = std::max(0.f, contentHeight - textAreaSize.y);
 }
 
 void InformationState::draw()
 {
-	sf::RenderWindow& window = *getContext().window;
-	window.setView(window.getDefaultView());
+	auto& window = *getContext().window;
 
-	// Draw background (with visible box)
+	// Draw background in UI space
+	window.setView(mUiView);
 	window.draw(mBackgroundSprite);
 
-	// Set up scroll view that matches the visible box area
-	sf::View scrollView(sf::FloatRect(0, 0, mScrollArea.getSize().x, mScrollArea.getSize().y));
-	scrollView.setViewport(sf::Rect(
-		mScrollArea.getPosition().x / window.getSize().x,
-		mScrollArea.getPosition().y / window.getSize().y,
-		mScrollArea.getSize().x / window.getSize().x,
-		mScrollArea.getSize().y / window.getSize().y
-	));
-	scrollView.move(0, +mScrollOffset);
+	// Build a scroll view sized to the text box (in UI coordinates)
+	const sf::Vector2f textAreaPos = mScrollArea.getPosition();
+	const sf::Vector2f textAreaSize = mScrollArea.getSize();
 
-	// Draw text within the scrollable area
+	sf::View scrollView({ 0.f, 0.f, textAreaSize.x, textAreaSize.y });
+
+	// Compute viewport inside the letterboxed UI viewport
+	sf::FloatRect vp;
+	vp.left = mUiViewport.left + (textAreaPos.x / 1920.f) * mUiViewport.width;
+	vp.top = mUiViewport.top + (textAreaPos.y / 1080.f) * mUiViewport.height;
+	vp.width = (textAreaSize.x / 1920.f) * mUiViewport.width;
+	vp.height = (textAreaSize.y / 1080.f) * mUiViewport.height;
+	scrollView.setViewport(vp);
+
+	// Center view according to scroll offset (so (0,0) of content is at top-left)
+	scrollView.setCenter(textAreaSize.x * 0.5f, mScrollOffset + textAreaSize.y * 0.5f);
+
+	// Draw the scrollable text
 	window.setView(scrollView);
-	for (const auto& text : mInfoTexts) {
-		window.draw(text);
-	}
+	for (const auto& t : mInfoTexts) window.draw(t);
 
-	// Reset to default view for other elements
-	window.setView(window.getDefaultView());
+	// Back to UI view for buttons / overlays
+	window.setView(mUiView);
 
-	//window.draw(mScrollArea);
-
-	// Button hover effect (existing code)
-	sf::Vector2f mousePos = window.mapPixelToCoords(sf::Mouse::getPosition(window));
-	if (mCloseInfoButton.getGlobalBounds().contains(mousePos))
+	// Hover scale + draw close button
+	sf::Vector2f mouseUi = window.mapPixelToCoords(sf::Mouse::getPosition(window), mUiView);
+	if (mCloseInfoButton.getGlobalBounds().contains(mouseUi))
 		mCloseInfoButton.setScale(1.2f, 1.2f);
 	else
 		mCloseInfoButton.setScale(1.1f, 1.1f);
@@ -123,41 +157,44 @@ bool InformationState::update(sf::Time)
 
 bool InformationState::handleEvent(const sf::Event& event)
 {
-	if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left) {
-		sf::Vector2f mousePos = getContext().window->mapPixelToCoords(sf::Vector2i(event.mouseButton.x, event.mouseButton.y));
+	auto& window = *getContext().window;
 
-		if (mCloseInfoButton.getGlobalBounds().contains(mousePos)) {
+	// Keep the UI letterboxed when the window resizes
+	if (event.type == sf::Event::Resized) {
+		mUiViewport = makeLetterboxViewport({ event.size.width, event.size.height });
+		mUiView.setViewport(mUiViewport);
+	}
+
+	if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left) {
+		sf::Vector2f mouseUi = window.mapPixelToCoords(
+			{ event.mouseButton.x, event.mouseButton.y }, mUiView);
+
+		if (mCloseInfoButton.getGlobalBounds().contains(mouseUi)) {
 			requestStackPop();
 			requestStackPush(States::Menu);
+			return true;
 		}
-		else if (mScrollArea.getGlobalBounds().contains(mousePos)) {
+		// Start dragging if within the scroll area
+		if (mScrollArea.getGlobalBounds().contains(mouseUi)) {
 			mIsDragging = true;
-			mLastMouseY = mousePos.y;
+			mLastMouseY = mouseUi.y;
 		}
 	}
-	else if (event.type == sf::Event::MouseButtonReleased && event.mouseButton.button == sf::Mouse::Left) {
+
+	else if (event.type == sf::Event::MouseButtonReleased && event.mouseButton.button == sf::Mouse::Left) 
 		mIsDragging = false;
-	}
+
 	else if (event.type == sf::Event::MouseMoved && mIsDragging) {
-		sf::Vector2f mousePos = getContext().window->mapPixelToCoords(sf::Vector2i(event.mouseMove.x, event.mouseMove.y));
-		float deltaY = mLastMouseY + mousePos.y;
-		mScrollOffset += deltaY;
-
-		// Clamp the scroll offset
-		float maxOffset = 30.f * mInfoTexts.size() - mScrollArea.getSize().y;
-		mScrollOffset = std::max(0.f, std::min(mScrollOffset, maxOffset));
-
-		mLastMouseY = mousePos.y;
+		sf::Vector2f mouseUi = window.mapPixelToCoords(
+			{ event.mouseMove.x, event.mouseMove.y }, mUiView);
+		float dy = mLastMouseY - mouseUi.y;           
+		mScrollOffset = std::clamp(mScrollOffset + dy, 0.f, mMaxOffset);
+		mLastMouseY = mouseUi.y;
 	}
-	else if (event.type == sf::Event::MouseWheelScrolled) {
-		mScrollOffset -= event.mouseWheelScroll.delta * 30.f;
 
-		// Clamp the scroll offset
-		float maxOffset = mInfoTexts.back().getPosition().y + 
-                 mInfoTexts.back().getGlobalBounds().height - 
-                 mScrollArea.getSize().y + 20.f;
-		mScrollOffset = std::max(0.f, std::min(mScrollOffset, maxOffset));
-	}
+	else if (event.type == sf::Event::MouseWheelScrolled) 
+		mScrollOffset = std::clamp(mScrollOffset - event.mouseWheelScroll.delta * 40.f, 0.f, mMaxOffset);
 
 	return true;
 }
+

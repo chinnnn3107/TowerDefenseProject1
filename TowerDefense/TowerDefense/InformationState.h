@@ -15,6 +15,10 @@ public:
 private:
     void clampScrollOffset();  // Helper function
 
+    // A fixed "virtual canvas" for UI (same as your design)
+    sf::View mUiView;            // 1920x1080 logical view
+    sf::FloatRect mUiViewport;        // letterboxed viewport in the window
+
     sf::Sprite mBackgroundSprite;
     sf::Sprite mCloseInfoButton;
     sf::RectangleShape mScrollArea;
@@ -22,7 +26,9 @@ private:
     sf::Font mFont;  // Store font as member
     std::vector<sf::Text> mInfoTexts;
 
-    float mScrollOffset;
-    bool mIsDragging;
-    float mLastMouseY;
+    float mScrollOffset = 0.f;
+    float mMaxOffset = 0.f;
+    float mLastMouseY = 0.f;
+
+    bool mIsDragging = false;;
 };
