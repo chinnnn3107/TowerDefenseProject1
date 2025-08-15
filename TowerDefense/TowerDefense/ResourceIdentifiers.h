@@ -8,7 +8,6 @@
 
 #include "ResourceHolder.h"
 
-// NEW FEATURE
 enum class MusicState
 {
     None,
@@ -133,7 +132,7 @@ namespace Textures
         tower3Button,
         circle,
 
-        // InputNameState // NEW FEATURE
+        // InputNameState 
         inputNameBackground,
         nextButton,
 
@@ -184,7 +183,6 @@ namespace GameConstants
     const float INCOME_INTERVAL = 10.0f; // Seconds between passive income
 }
 
-// NEW FEATURE
 namespace SoundBuffers
 {
     enum ID
@@ -211,7 +209,7 @@ namespace SoundBuffers
         UIclick
     };
 }
-// NEW FEATURE
+
 namespace Musics
 {
     enum ID
@@ -224,6 +222,5 @@ namespace Musics
 // Type aliases for easy access
 using TextureHolder = ResourceHolder<sf::Texture, Textures::ID>;
 using FontHolder = ResourceHolder<sf::Font, Fonts::ID>;
-// NEW FEATURE
 using SoundBufferHolder = ResourceHolder<sf::SoundBuffer, SoundBuffers::ID>;
 using MusicHolder = ResourceHolder<sf::Music, Musics::ID>;

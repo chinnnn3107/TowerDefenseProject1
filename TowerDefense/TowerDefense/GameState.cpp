@@ -542,7 +542,7 @@ bool GameState::handleEvent(const Event& event)
                         if (tileC >= 3 && tileC <= 5)
                             player.addMoney(GameConstants::TOWER_COSTS[tileC - 3] / 10 * 7);
                         else
-                            player.addMoney((GameConstants::UPGRADE_COSTS[tileC - 6] + GameConstants::TOWER_COSTS[tileC - 3]) / 10 * 7);
+                            player.addMoney((GameConstants::UPGRADE_COSTS[tileC - 6] + GameConstants::TOWER_COSTS[tileC - 6]) / 10 * 7);
 
                         int index = MapHandle::findBlockmap(currentLevelIndex, row, col);
                         towerconstructed[index] = false;
@@ -598,23 +598,44 @@ bool GameState::handleEvent(const Event& event)
 
                 return false;
             }
+
+            // Clicked Sprite
+            ctower* clickedTower = nullptr;
+            for (auto& t : towers) {
+                if (t.getSprite().getGlobalBounds().contains(mx, my)) {
+                    clickedTower = &t;
+                    break;
+                }
+            }
+
             // If clicked on a tile that already has a tower (C >= 3)
-            else if (c >= 3) {
+            if (c >= 3 || clickedTower) {
                 selectedinfo = c;
+                if (clickedTower->getSprite().getTexture() == towerTexture[0]) selectedinfo = 3;
+                else if (clickedTower->getSprite().getTexture() == towerTexture[1]) selectedinfo = 4;
+                else if (clickedTower->getSprite().getTexture() == towerTexture[2]) selectedinfo = 5;
+                else if (clickedTower->getSprite().getTexture() == towerTexture[3]) selectedinfo = 6;
+                else if (clickedTower->getSprite().getTexture() == towerTexture[4]) selectedinfo = 7;
+                else if (clickedTower->getSprite().getTexture() == towerTexture[5]) selectedinfo = 8;
                 selectedRow = clicked.getRow();
                 selectedCol = clicked.getCol();
-
                 // Get fixed display tile for showing info panel
                 pair<int, int> fixed = MapHandle::getTowerdes(currentLevelIndex, clicked.getRow(), clicked.getCol());
+                if (fixed.first == -1 && fixed.second == -1) {
+                    selectedRow = clicked.getRow() + 3;
+                    selectedCol = clicked.getCol();
+                    fixed = MapHandle::getTowerdes(currentLevelIndex, selectedRow, selectedCol);
+                }
+
                 float fx = (float)fixed.second * cpoint::TILE_SIZE;
                 float fy = (float)fixed.first * cpoint::TILE_SIZE;
 
                 // Display tower info panel and upgrade button if upgradeable
-                infoSprite[c - 3].setPosition((float)fx + cpoint::TILE_SIZE, (float)fy - 4 * cpoint::TILE_SIZE);
+                infoSprite[selectedinfo - 3].setPosition((float)fx + cpoint::TILE_SIZE, (float)fy - 4 * cpoint::TILE_SIZE);
                 sellButton.setPosition((float)fx + cpoint::TILE_SIZE * 3.5f + 200.f, (float)fy - 4.85f * cpoint::TILE_SIZE + 30.f);
                 circleRange.setPosition((float)fx + cpoint::TILE_SIZE * 0.5f, (float)fy + cpoint::TILE_SIZE * 0.5f - 80.f);
 
-                if (c >= 3 && c <= 5) 
+                if (selectedinfo >= 3 && selectedinfo <= 5)
                     upgradeButton[selectedinfo - 3].setPosition((float)fx + cpoint::TILE_SIZE + 300.f, (float)fy - 4.85f * cpoint::TILE_SIZE + 110.f);
 
 

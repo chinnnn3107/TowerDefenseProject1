@@ -99,7 +99,7 @@ bool SettingState::handleEvent(const sf::Event& event)
 		// Convert mouse position from screen pixels to world coordinates (considering the current view)
 		sf::Vector2f mousePos = getContext().window->mapPixelToCoords(sf::Vector2i(event.mouseButton.x, event.mouseButton.y));
 
-		// Click MUSIC ON/OFF - NEW FEATURE
+		// Click MUSIC ON/OFF 
 		if (mMusicOnButton.getGlobalBounds().contains(mousePos) ||
 			mMusicOffButton.getGlobalBounds().contains(mousePos))
 		{
@@ -126,7 +126,7 @@ bool SettingState::handleEvent(const sf::Event& event)
 
 			return true;
 		}
-		// Click SOUND ON/OFF - NEW FEATURE
+		// Click SOUND ON/OFF 
 		if (mSoundOnButton.getGlobalBounds().contains(mousePos) ||
 			mSoundOffButton.getGlobalBounds().contains(mousePos))
 		{

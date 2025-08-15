@@ -223,6 +223,7 @@ bool SaveManagement::load(string pName)
 			getline(ss, temp, ' ');
 			SaveManagement::playerResult[i].curGold = stoi(temp);
 
+			SaveManagement::playerResult[i].towers.clear();
 			while (getline(ss, temp, ' '))
 			{
 				ctower t;

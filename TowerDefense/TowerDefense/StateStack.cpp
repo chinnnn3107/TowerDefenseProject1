@@ -104,8 +104,6 @@ void StateStack::applyPendingChanges()
 {
 	FOREACH(PendingChange change, mPendingList)
 	{
-		std::cout << "Applying change: " << getActionName(change.action)
-			<< " for state " << getStateName(change.stateID) << "\n";
 		switch (change.action)
 		{
 		case Push:

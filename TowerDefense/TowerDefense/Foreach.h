@@ -8,13 +8,6 @@
 
 
 // Macro to emulate C++11 range-based for loop
-// Instead of for (decl : range) you write FOREACH(decl, range) as in the following example
-//
-// std::vector<int> v = ...;
-// FOREACH(int& i, v)
-// {
-//     i += 2;
-// }
 #define FOREACH(declaration, container)																											\
 	if (bool BOOK_LINE_ID(broken) = false) {} else																								\
 	for (auto BOOK_LINE_ID(itr) = (container).begin(); BOOK_LINE_ID(itr) != (container).end() && !BOOK_LINE_ID(broken); ++BOOK_LINE_ID(itr))	\

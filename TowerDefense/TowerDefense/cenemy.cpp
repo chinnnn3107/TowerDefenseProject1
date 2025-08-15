@@ -13,23 +13,19 @@ cenemy::cenemy()
     _isDead(false),
     _isAttack(false)
 {
-
-    // Directions: up, left, down, right for pathfinding
+    // Movement direction offsets for BFS pathfinding (up, left, down, right)
     dd[0] = -1; dd[1] = 0; dd[2] = 1; dd[3] = 0;
     dc[0] = 0; dc[1] = -1; dc[2] = 0; dc[3] = 1;
 
-    // Default positions in grid
+    // Default grid positions
     _start = cpoint();
     _end = cpoint();
     _curr = cpoint();
 
-    // Path array initialization
+    // Initialize path array with default points
     for (int i = 0; i < cpoint::MAP_ROW * cpoint::MAP_COL; i++)
         _p[i] = cpoint();
-
-    _isDead = false;
 }
-
 
 cenemy::cenemy(cpoint tstart, cpoint tend, cpoint tcurr) : cenemy() {
     _start = tstart;
@@ -37,6 +33,7 @@ cenemy::cenemy(cpoint tstart, cpoint tend, cpoint tcurr) : cenemy() {
     _curr = tcurr;
 }
 
+// Pathfinding core (BFS)
 void cenemy::calcPath(int a[][cpoint::MAP_COL], int n, cpoint s, cpoint e) {
     std::queue<cpoint> q;
     bool visited[cpoint::MAP_ROW][cpoint::MAP_COL] = {};
@@ -47,14 +44,22 @@ void cenemy::calcPath(int a[][cpoint::MAP_COL], int n, cpoint s, cpoint e) {
     parent[s.getRow()][s.getCol()] = s;
 
     bool found = false;
+
+    // BFS search
     while (!q.empty()) {
         cpoint curr = q.front(); q.pop();
+
+        // If we reached the end, stop search
         if (curr.getRow() == e.getRow() && curr.getCol() == e.getCol()) {
             found = true;
             break;
         }
+
+        // Check 4 neighbor cells
         for (int i = 0; i < 4; i++) {
             int dmoi = dd[i] + curr.getRow(), cmoi = dc[i] + curr.getCol();
+
+            // Valid cell & walkable (C value = 0)
             if (dmoi >= 0 && dmoi < cpoint::MAP_ROW && cmoi >= 0 && cmoi < cpoint::MAP_COL
                 && !visited[dmoi][cmoi] && a[dmoi][cmoi] == 0) {
                 visited[dmoi][cmoi] = true;
@@ -64,6 +69,7 @@ void cenemy::calcPath(int a[][cpoint::MAP_COL], int n, cpoint s, cpoint e) {
         }
     }
 
+    // If a path was found, reconstruct from end to start
     if (found) {
         std::vector<cpoint> pathList;
         cpoint curr = e;
@@ -72,16 +78,20 @@ void cenemy::calcPath(int a[][cpoint::MAP_COL], int n, cpoint s, cpoint e) {
             curr = parent[curr.getRow()][curr.getCol()];
         }
         pathList.push_back(s);
+
+        // Reverse path to start → end order
         std::reverse(pathList.begin(), pathList.end());
+
+        // Store into _p
         int i = 0;
         for (auto& p : pathList) _p[i++] = p;
         _pathLength = i;
     }
-    else {
+    else 
         _pathLength = 0;
-    }
 }
 
+// Converts map from cpoint grid to integer grid & calls BFS
 void cenemy::findPath(cpoint a[][cpoint::MAP_COL], cpoint s, cpoint e) {
     int ta[cpoint::MAP_ROW][cpoint::MAP_COL];
     for (int i = 0; i < cpoint::MAP_ROW; i++)

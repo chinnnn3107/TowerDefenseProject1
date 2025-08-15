@@ -40,7 +40,7 @@ public:
 	// process save file
 	struct levelResult
 	{
-		bool win = false;	// ever win? // NEW FEATURE
+		bool win = false;	// ever win? 
 		int status;			// isGameOver = 0, isGameWin = 1, isNotFinished = -1
 		int curGold;
 		int stars;			// (status != 1) => (stars = 0)
