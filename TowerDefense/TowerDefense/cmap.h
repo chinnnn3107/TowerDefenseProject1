@@ -20,7 +20,7 @@ private:
     ctower _ctw;
     cpoint _m[cpoint::MAP_ROW][cpoint::MAP_COL];
     
-    //Base Tower properties
+    // Base Tower properties
     cBaseTower _mainTower;
     cpoint _mainTowerTile; // Tile position of main tower
     sf::Vector2f _mainTowerPixelPos;  // Actual pixel position
@@ -45,13 +45,11 @@ public:
     ctower& getTower() { return _ctw; }
     cpoint(&getMap())[cpoint::MAP_ROW][cpoint::MAP_COL]{ return _m; }
     sf::Sprite& getBackground() { return _background; }
-
-    // Main Tower interface
-    void setMainTowerTile(const cpoint& tilePos);
     cpoint getMainTowerTile() const { return _mainTowerTile; }
     cBaseTower& getMainTower() { return _mainTower; }
-
-    // Helper methods
     sf::Vector2f getMainTowerPosition() const { return _mainTowerPixelPos; }
     bool isMainTowerDestroyed() const { return _mainTower.isDestroyed(); }
+
+    // Setter
+    void setMainTowerTile(const cpoint& tilePos);
 };

@@ -29,6 +29,8 @@ class cbullet
 
 public:
     cbullet();
+
+    // Update internal copy of map for bullet path calculations
     void updateMap(cpoint map[][cpoint::MAP_COL]);
 
     // Getter
@@ -53,7 +55,7 @@ public:
     int queryCFromRowCol(int row, int col) const;
     int calcPathBullet(const cpoint& tower);
 
-    // Bullet collision detection
+    // Collision detection
     bool checkCollision(const cenemy& enemy) const;
 
     // Move bullet one step toward the enemy's current position
@@ -65,7 +67,7 @@ public:
     void updateSprite();
     void move(float dx, float dy);
 
-    // Bullet logic
+    // Bullet state management
     bool isActive() const { return _active; } // Returns true if the bullet is still active (on screen, valid target), used to skip deactivated bullets.
     void deactivate() { _active = false; } // Marks the bullet as inactive after hitting an enemy or going off - screen, Prevents further updates or rendering.
 

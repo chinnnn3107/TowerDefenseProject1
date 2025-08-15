@@ -64,7 +64,7 @@ MapSelectionState::MapSelectionState(StateStack& stack, Context context)
 	centerOrigin(level4Locked);
 	lockedLevels.push_back(level4Locked);
 
-	// NEW FEATURE: Load Text shown for 4 maps
+	// Load Text shown for 4 maps
 	font = getContext().fonts->get(Fonts::BruceForever);
 
 	for (int i = 0; i < 4; i++)
@@ -152,7 +152,7 @@ MapSelectionState::MapSelectionState(StateStack& stack, Context context)
 		}
 	}
 
-	// NEW FEATURE: Set up text to display name
+	// Set up text to display name
 	playerName.setFont(font);
 	playerName.setCharacterSize(50);
 	playerName.setFillColor(Color::White);
@@ -167,7 +167,7 @@ void MapSelectionState::draw()
 
 	window.setView(window.getDefaultView());
 	window.draw(backgroundSprite);
-	window.draw(playerName); // NEW FEATURE
+	window.draw(playerName); 
 
 	// Home button
 	if (homeButton.getGlobalBounds().contains(mousePos))
@@ -176,7 +176,7 @@ void MapSelectionState::draw()
 		homeButton.setScale(1.f, 1.f);
 	window.draw(homeButton);
 
-	// 4 Mini maps - NEW FEATURE
+	// 4 Mini maps 
 	int currentWaveIndex = 0;
 	int starsIndex = 0;
 
@@ -266,7 +266,7 @@ bool MapSelectionState::handleEvent(const sf::Event& event)
 
 		// Choose level
 		for (size_t i = 0; i < unlockedLevels.size(); i++) {
-			if (i == 0 || SaveManagement::playerResult[i - 1].win) // NEW FEATURE: check if last level was done
+			if (i == 0 || SaveManagement::playerResult[i - 1].win) // check if last level was done
 			{
 				if (unlockedLevels[i].getGlobalBounds().contains(mousePos))
 				{

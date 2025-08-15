@@ -25,5 +25,5 @@ private:
 	int						starsShown; // number of stars currently being shown
 
 private:
-	sf::Sound GameWinSound; // NEW FEATURE
+	sf::Sound GameWinSound; 
 };

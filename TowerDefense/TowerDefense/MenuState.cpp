@@ -15,7 +15,7 @@ MenuState::MenuState(StateStack& stack, Context context)
 	sf::Texture& texture = context.textures->get(Textures::MenuScreen);
 	mBackgroundSprite.setTexture(texture);
 
-	// NEW FEATURE: Load Music
+	// Load Music
 	auto& musicHolder = *getContext().musics;
 	auto& musicFlag = *getContext().isMusicOn;
 	auto& musicState = *getContext().currentMusic;

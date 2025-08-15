@@ -1,4 +1,3 @@
-// cBaseTower.h
 #pragma once
 #include <SFML/Graphics.hpp>
 #include "cpoint.h"
@@ -22,25 +21,28 @@ public:
     cBaseTower();
     cBaseTower(int row, int col);
 
-    void setTexture(const sf::Texture& texture);
-    void setPosition(int row, int col);
-    void setPixelPosition(float x, float y);
-    void setHealth(int hp);
-    void setMaxHealh(int hp);
     void takeDamage(int damage);
     void heal(int amount);
     bool isDestroyed() const;
     bool recentlyDamaged() const;
-    void setCurrentHealth(int curHP); // NEW FEATURE
 
+    // Getter
     int getHealth() const { return currentHealth; }
     int getMaxHealth() const { return maxHealth; }
     sf::Sprite& getSprite() { return sprite; }
     const sf::Sprite& getSprite() const { return sprite; }
     const cpoint& getPosition() const { return position; }
 
-    // For visual health display
+    // Setter
+    void setTexture(const sf::Texture& texture);
+    void setPosition(int row, int col);
+    void setPixelPosition(float x, float y);
+    void setHealth(int hp);
+    void setMaxHealh(int hp);
+    void setCurrentHealth(int curHP); 
     void setHealthBarSize(float width, float height);
+
+    // For visual health display
     void drawHealthBar(sf::RenderWindow& window) const;
 
 private:

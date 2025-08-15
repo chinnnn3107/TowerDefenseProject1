@@ -8,15 +8,15 @@
 #include "SettingState.h"
 #include "InformationState.h"
 #include "MapSelectionState.h"
-// NEW FEATURE
 #include "InputNameState.h"
 #include "SaveManagement.h"
 
 Application::Application()
-    : mWindow(sf::VideoMode(1920, 1080), "Tower Defense", sf::Style::Close)
+    : mWindow(sf::VideoMode(1920, 1080), "Tower Defense")
     , mTextures()
     , mFonts()
     , mPlayer()
+    // Initialize StateStack with the application context (window, resources, audio, settings)
     , mStateStack(State::Context(mWindow, mTextures, mFonts, mPlayer, mVictoryStars, mSoundBuffers, mMusics, isMusicOn, isSoundOn, currentMusic))
 {
     mWindow.setVerticalSyncEnabled(true); // Smoother rendering
@@ -49,7 +49,7 @@ Application::Application()
     mTextures.load(Textures::FireShootEffect, "Media/Textures/FireShootEffect.png");
     mTextures.load(Textures::IceShootEffect, "Media/Textures/IceShootEffect.png");
 
-    // Load tower Infos
+    // Load tower infos
     mTextures.load(Textures::Info1, "Media/Textures/infotower1.png");
     mTextures.load(Textures::Info2, "Media/Textures/infotower2.png");
     mTextures.load(Textures::Info3, "Media/Textures/infotower3.png");
@@ -57,12 +57,12 @@ Application::Application()
     mTextures.load(Textures::Info2plus, "Media/Textures/infotower2+.png");
     mTextures.load(Textures::Info3plus, "Media/Textures/infotower3+.png");
 
-    // Load bullet textures
+    // Load bullet sprites
     mTextures.load(Textures::Bomb, "Media/Textures/bomb_sprite_sheet.png");
     mTextures.load(Textures::Fire, "Media/Textures/fire_bullet_sprite_sheet.png");
     mTextures.load(Textures::Ice, "Media/Textures/ice_bullet_sprite_sheet.png");
 
-    // Load enemy's animation textures
+    // Load enemy animation textures
     mTextures.load(Textures::Enemy1_Walk, "Media/Textures/enemy_1_walk_126_123_6.png");
     mTextures.load(Textures::Enemy1_Attack, "Media/Textures/enemy_1_attack_125_125_6.png");
     mTextures.load(Textures::Enemy1_Death, "Media/Textures/enemy_1_death_125_125_6.png");
@@ -73,7 +73,7 @@ Application::Application()
     mTextures.load(Textures::Enemy3_Attack, "Media/Textures/enemy_3_attack_212_210_6.png");
     mTextures.load(Textures::Enemy3_Death, "Media/Textures/enemy_3_death_212_210_6.png");
 
-    // Load functional button
+    // Load functional buttons
     mTextures.load(Textures::upgradeButton75, "Media/UI/buttons/upgradeButton75.png");
     mTextures.load(Textures::upgradeButton100, "Media/UI/buttons/upgradeButton100.png");
     mTextures.load(Textures::upgradeButton125, "Media/UI/buttons/upgradeButton125.png");
@@ -138,7 +138,6 @@ Application::Application()
     mTextures.load(Textures::tower3Button, "Media/UI/buttons/tower3Button.png");
     mTextures.load(Textures::circle, "Media/UI/icons/circle.png");
 
-    // NEW FEATURE
     // Load Texture in InputNameState 
     mTextures.load(Textures::inputNameBackground, "Media/Textures/inputNameBackground.png");
     mTextures.load(Textures::nextButton, "Media/UI/buttons/nextButton.png");
@@ -147,7 +146,6 @@ Application::Application()
     mTextures.load(Textures::loadBackground, "Media/UI/loadBackground.png");
     mTextures.load(Textures::nameBar, "Media/UI/buttons/nameBar.png");
 
-    // NEW FEATURE
     // Load sound and music
     mSoundBuffers.load(SoundBuffers::BulletBomb, "Audio/BulletBomb.wav");
     mSoundBuffers.load(SoundBuffers::BulletFire, "Audio/BulletFire.wav");
@@ -179,8 +177,8 @@ void Application::run()
 
     while (mWindow.isOpen())
     {
-        sf::Time dt = clock.restart();
-        dt = dt * gameSpeed;
+        sf::Time dt = clock.restart(); // Get elapsed time since last frame
+        dt = dt * gameSpeed; // Apply game speed multiplier
         processInput();
         update(dt);
         render();
@@ -206,7 +204,7 @@ void Application::processInput()
     sf::Event event;
     while (mWindow.pollEvent(event))
     {
-        // NEW FEATURE: Global click sound logic
+        // Global click sound logic
         if (event.type == sf::Event::MouseButtonPressed) {
             if (isSoundOn) {
                 mClickSound.setBuffer(mSoundBuffers.get(SoundBuffers::UIclick));

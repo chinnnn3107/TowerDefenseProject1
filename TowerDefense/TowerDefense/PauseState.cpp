@@ -89,7 +89,7 @@ void PauseState::draw()
 		quitButton.setScale(1.f, 1.f);
 	window.draw(quitButton);
 
-	// On / Off button - NEW FEATURE
+	// On / Off button 
 	if (*getContext().isMusicOn) {
 		if (musicOnButton.getGlobalBounds().contains(mousePos))
 			musicOnButton.setScale(1.5f, 1.5f);
@@ -137,7 +137,7 @@ bool PauseState::handleEvent(const sf::Event& event)
 			return true;
 		}
 
-		// Click MUSIC ON/OFF - NEW FEATURE
+		// Click MUSIC ON/OFF
 		if (musicOnButton.getGlobalBounds().contains(mousePos))
 		{
 			auto& globalMusicFlag = *getContext().isMusicOn;

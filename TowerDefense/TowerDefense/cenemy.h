@@ -41,7 +41,7 @@ private:
     EnemyType _type;
 
     // Money logic
-    int mDamage;  // Add damage property
+    int mDamage;  // Damage property
     bool mHasDamagedTower; // To prevent multiple hits
     bool mRewardGiven;
 
@@ -105,13 +105,13 @@ public:
     void setPosition(float x, float y);
     void setCurrentTarget(int t) { _currentTarget = t; }
     void loadFromData(const EnemyAnimationData& data);
+
+    // State checks
     bool hasReachedEnd() const { return _reachedEnd; }
     bool isDead() const { return _health <= 0; }
-
     bool isActive() const {
         return !isDead() && !hasReachedEnd();
     }
-
     bool shouldBeRemoved() const {
         return (isDead() && hasFinishedDeathAnim()) || hasReachedEnd();
     }
@@ -134,7 +134,7 @@ public:
     // Pathfinding
     void findPath(cpoint a[][cpoint::MAP_COL], cpoint s, cpoint e);
 
-    // Prevent duplicate
+    // Reward management
     bool hasGivenReward() const { return mRewardGiven; }
     void markRewardGiven() { mRewardGiven = true; }
 
